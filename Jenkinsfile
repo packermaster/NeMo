@@ -481,47 +481,44 @@ pipeline {
     //   }
     // }
 
-    // Pretrained models need to be retrained?
-    // TODO: Pytorch Lightning has some issues with restoring Metric classes, asked on the lightning slack if they can
-    // provide a simple solution.
-    // stage('L2: Parallel NLP Examples 2') {
-    //   when {
-    //     anyOf{
-    //       branch 'main'
-    //       changeRequest target: 'main'
-    //     }
-    //   }
-    //   failFast true
-    //   parallel {
-    //     stage ('NER finetuning from pretrained Test') {
-    //       steps {
-    //         sh 'cd examples/nlp/token_classification && \
-    //         python token_classification.py \
-    //         pretrained_model=NERModel \
-    //         model.dataset.data_dir=/home/TestData/nlp/ner/ \
-    //         model.train_ds.batch_size=2 \
-    //         model.dataset.use_cache=false \
-    //         trainer.gpus=[0] \
-    //         +trainer.fast_dev_run=true \
-    //         exp_manager.exp_dir=examples/nlp/token_classification/ner_from_pretrained'
-    //         sh 'rm -rf examples/nlp/token_classification/ner_from_pretrained'
-    //       }
-    //     }
-    //     stage ('Punctuation and capitalization finetuning from pretrained test') {
-    //       steps {
-    //         sh 'cd examples/nlp/token_classification && \
-    //         python punctuation_capitalization.py \
-    //         pretrained_model=Punctuation_Capitalization_with_BERT \
-    //         model.dataset.data_dir=/home/TestData/nlp/token_classification_punctuation/ \
-    //         trainer.gpus=[1] \
-    //         +trainer.fast_dev_run=true \
-    //         model.dataset.use_cache=false \
-    //         exp_manager.exp_dir=examples/nlp/token_classification/pc_from_pretrained'
-    //         sh 'rm -rf examples/nlp/token_classification/pc_from_pretrained'
-    //       }
-    //     }
-    //   }
-    // }
+    stage('L2: Parallel NLP Examples 2') {
+      when {
+        anyOf{
+          branch 'main'
+          changeRequest target: 'main'
+        }
+      }
+      failFast true
+      parallel {
+        stage ('NER finetuning from pretrained Test') {
+          steps {
+            sh 'cd examples/nlp/token_classification && \
+            python token_classification.py \
+            pretrained_model=NERModel \
+            model.dataset.data_dir=/home/TestData/nlp/ner/ \
+            model.train_ds.batch_size=2 \
+            model.dataset.use_cache=false \
+            trainer.gpus=[0] \
+            +trainer.fast_dev_run=true \
+            exp_manager.exp_dir=examples/nlp/token_classification/ner_from_pretrained'
+            sh 'rm -rf examples/nlp/token_classification/ner_from_pretrained'
+          }
+        }
+        stage ('Punctuation and capitalization finetuning from pretrained test') {
+          steps {
+            sh 'cd examples/nlp/token_classification && \
+            python punctuation_capitalization.py \
+            pretrained_model=Punctuation_Capitalization_with_BERT \
+            model.dataset.data_dir=/home/TestData/nlp/token_classification_punctuation/ \
+            trainer.gpus=[1] \
+            +trainer.fast_dev_run=true \
+            model.dataset.use_cache=false \
+            exp_manager.exp_dir=examples/nlp/token_classification/pc_from_pretrained'
+            sh 'rm -rf examples/nlp/token_classification/pc_from_pretrained'
+          }
+        }
+      }
+    }
 
     stage('L2: Intent and Slot Classification') {
       when {
@@ -659,30 +656,29 @@ pipeline {
               sh 'ls -lha examples/nlp/language_modeling'
             }
         }
-        // TODO: Need to fix exp checkpoint callback and update the callback parameter
-        // stage('L2: Pretraining BERT from Preprocessed') {
-        //     steps {
-        //       sh 'cd examples/nlp/language_modeling && \
-        //       python bert_pretraining.py \
-        //       --config-name=bert_pretraining_from_preprocessed_config.yaml \
-        //       trainer.gpus=[1] \
-        //       trainer.precision=16 \
-        //       trainer.amp_level=O1 \
-        //       +trainer.fast_dev_run=true \
-        //       model.train_ds.data_file=/home/TestData/nlp/wiki_book_mini/training \
-        //       model.train_ds.batch_size=8 \
-        //       model.language_model.lm_checkpoint=/home/TestData/nlp/bert_ckpts/nemo1.0/bert_base_uncased_mlm_final_1074591_nemo1.0.pt \
-        //       model.language_model.config_file=/home/TestData/nlp/bert_configs/uncased_L-12_H-768_A-12.json \
-        //       model.optim.lr=0.875e-4 \
-        //       model.optim.weight_decay=0.01 \
-        //       model.optim.sched.warmup_ratio=0.01 \
-        //       exp_manager.exp_dir=PretrainingBERTFromPreprocessed \
-        //       exp_manager.create_checkpoint_callback=False \
-        //       '
-        //       sh 'rm -rf examples/nlp/language_modeling/PretrainingBERTFromPreprocessed'
-        //       sh 'ls -lha examples/nlp/language_modeling'
-        //     }
-        // }
+        stage('L2: Pretraining BERT from Preprocessed') {
+            steps {
+              sh 'cd examples/nlp/language_modeling && \
+              python bert_pretraining.py \
+              --config-name=bert_pretraining_from_preprocessed_config.yaml \
+              trainer.gpus=[1] \
+              trainer.precision=16 \
+              trainer.amp_level=O1 \
+              +trainer.fast_dev_run=true \
+              model.train_ds.data_file=/home/TestData/nlp/wiki_book_mini/training \
+              model.train_ds.batch_size=8 \
+              model.language_model.lm_checkpoint=/home/TestData/nlp/bert_ckpts/nemo1.0/bert_base_uncased_mlm_final_1074591_nemo1.0.pt \
+              model.language_model.config_file=/home/TestData/nlp/bert_configs/uncased_L-12_H-768_A-12.json \
+              model.optim.lr=0.875e-4 \
+              model.optim.weight_decay=0.01 \
+              model.optim.sched.warmup_ratio=0.01 \
+              exp_manager.exp_dir=PretrainingBERTFromPreprocessed \
+              exp_manager.create_checkpoint_callback=False \
+              '
+              sh 'rm -rf examples/nlp/language_modeling/PretrainingBERTFromPreprocessed'
+              sh 'ls -lha examples/nlp/language_modeling'
+            }
+        }
       }
     }
 
