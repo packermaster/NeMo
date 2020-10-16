@@ -480,12 +480,9 @@ pipeline {
     //   }
     // }
 
-<<<<<<< HEAD
     // Pretrained models need to be retrained?
-=======
     // TODO: Pytorch Lightning has some issues with restoring Metric classes, asked on the lightning slack if they can
     // provide a simple solution.
->>>>>>> 03dadeb2a72b79c1e9c9444ff555915a4f6a3d5e
     // stage('L2: Parallel NLP Examples 2') {
     //   when {
     //     anyOf{
