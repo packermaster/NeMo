@@ -46,7 +46,7 @@ pipeline {
         sh 'python -c "import pytorch_lightning; print(pytorch_lightning.__version__)"'
       }
     }
-    
+
     stage('L0: Unit Tests GPU') {
       steps {
         sh 'pytest -m "unit and not skipduringci and not pleasefixme"'
@@ -449,7 +449,7 @@ pipeline {
         }
       }
     }
-    // Adding this back after upgrade
+    // TODO: Adding this back after upgrade
     // stage('L2: Text Classification with Model Parallel Size 2 Megatron BERT') {
     //   when {
     //     anyOf{
@@ -480,7 +480,12 @@ pipeline {
     //   }
     // }
 
+<<<<<<< HEAD
     // Pretrained models need to be retrained?
+=======
+    // TODO: Pytorch Lightning has some issues with restoring Metric classes, asked on the lightning slack if they can
+    // provide a simple solution.
+>>>>>>> 03dadeb2a72b79c1e9c9444ff555915a4f6a3d5e
     // stage('L2: Parallel NLP Examples 2') {
     //   when {
     //     anyOf{
@@ -656,6 +661,7 @@ pipeline {
               sh 'ls -lha examples/nlp/language_modeling'
             }
         }
+        // TODO: Need to fix exp checkpoint callback and update the callback parameter
         stage('L2: Pretraining BERT from Preprocessed') {
             steps {
               sh 'cd examples/nlp/language_modeling && \
@@ -673,6 +679,7 @@ pipeline {
               model.optim.weight_decay=0.01 \
               model.optim.sched.warmup_ratio=0.01 \
               exp_manager.exp_dir=PretrainingBERTFromPreprocessed \
+              exp_manager.create_checkpoint_callback=False \
               '
               sh 'rm -rf examples/nlp/language_modeling/PretrainingBERTFromPreprocessed'
               sh 'ls -lha examples/nlp/language_modeling'
